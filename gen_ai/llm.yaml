@@ -14,78 +14,274 @@ personalization: true
 debug_info: false
 use_full_documents: true
 use_relevancy_score: false
-bq_project_id: chertushkin-genai-sa
-dataset_name: uhg
+bq_project_id: mkamatala-genai-bb
+dataset_name: factset
 terraform_credentials: /home/chertushkin/terraform-service-account-credentials.json
 terraform_instance_name: talk-to-docs-instance
 terraform_redis_name: talk-to-docs-redis-instance
-gcs_source_bucket: gs://uhg_data/extractions_20240501
+gcs_source_bucket: gs://factset-raw-data/extractions20240502
 similar_questions_number: 0
-
 is_debug: false
 gradio_root_path: /t2x-mig-ui
 
 aspect_based_summary_prompt: |
   You are a professional summarizer of the documents. You receive the question and the document. It is expected that the document may contain an answer to the question.
-  You mission is to create short summary with respect to the question. 
+  Your mission is to create a short summary with respect to the question. The summary should contain the following key elements:
+    1. Determine if the document is related to a “10K filing” or if its an “Earnings Transcript" or if its related “Street Account News”.
+    2. Identify the name of the company the document is related to and the ticker symbol
+    3. The date of the filing
+    4. The quarter and year for which the document is applicable
+    5. Brief summary of the contents
+
 
   <Examples>
     <Document>
-      3D Mammography
-      Standard benefit plan provides coverage for 3D Mammography/DBT for breast cancer screening (preventive) and diagnostic testing.
-      Codes 77061, 77062, 77063, G2079 represent 3D mammography; description may not include **3D**.
-      No specific diagnosis required.
-      ---
-      **Plan Coverage**
-      =================
-      **Fully-Insured plan:** Covered when valid code is billed.
-      **ASO plan:** Covered when AVA/ACET is silent on coverage for (3D) mammography, and a valid code is billed.
-      ---
-      **Service Covered - Member has code**
-      =====================================
-      **Code is valid**
-      -----------------
-              + Advise that services for the code would be covered under their plan.
-              + Quote applicable benefits.
-              + When emailing quoted benefits, advise which benefits you are sending; benefits will not state coverage for 3D mammography.
-              + Offer status of their preferred provider **-or-** a list of INN providers.
-      **Code is not valid** 
-              + Advise that services represented by the provided code would not be covered under their plan.
-              + **FEC:** Assist member to contact their provider to discuss their specific services.
-              + **All others:** Encourage member to discuss specific services with their provider; complete provider outreach at your discretion if situation is urgent/escalated.
-      **Service Covered - Member does not have code**
-      ===============================================
-      **FEC:** Assist member to contact their provider to discuss their specific services.
-      **All others:**
-              + Provide general benefits.
-              + Educate member that specific benefits cannot be verified without a procedure code or description.
-              + Encourage member to discuss specific services with their provider; complete provider outreach at your discretion if situation is urgent/escalated.
-    </Document>
-    <Question>My doctor is recommending I start having a 3D mammography for my routine mammogram screengings. Are those covered?</Question> 
-  
-    <Output>
-      <summary>3D mammograms are covered by the standard benefit plan for both preventive and diagnostic testing. The coverage is valid for codes 77061, 77062, 77063, and G2079, even if the description does not include \"3D\". No specific diagnosis is required for coverage. For fully-insured plans, coverage is provided when a valid code is billed. For ASO plans, coverage is provided when the AVA/ACET is silent on coverage for 3D mammograms and a valid code is billed.</summary>
-      <summary_reasoning>The question asks about coverage details for 3D mammograms. The document provides information about coverage for 3D mammograms, but it does not specify when the coverage started. Therefore, the summary will include the coverage details but will not include information about when the coverage started.</summary_reasoning>
-    </Output>
-  </Examples>
+      UNITED STATESSECURITIES AND EXCHANGE COMMISSIONWashington, D.C. 20549FORM 10-K 
 
-  <Instructions>
-    - Limit the number of sentences in summary to 5-6 sentences max.
-    - Keep all the details that help to answer the question in the summary.
-    - If the document does not have details that can help to asnwer the question, the summary should be "The document does not provide details to answer the question".
-    - Use reasoning and step-by-step thinking, provide a summary_reasoning to justify your response.
-    - Provide the JSON response.
-    - Response format - all the fields need to be returned as strings. 
-      {{
-        "summary": <Summary of the document with respect to the question>
-        "summary_reasoning": "<Step by step reasoning about what should be included in summary with respect to the question>",
-      }}
+    |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    | (Mark  one) | | |  | | |  | | |  | | |
+    |  | | | ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d)OF THE SECURITIES EXCHANGE ACT OF 1934 | | | | | |  | | |
 
-  </Instructions>
+    For the fiscal year ended December  31, 2022   
+    OR 
 
-  Now it's your turn!
-  <Document>{retrieved_doc}</Document>
-  <Question>{question}</Question>
+    |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    |  | | | TRANSITION  REPORT  PURSUANT  TO  SECTION  13  OR  15(d)OF THE SECURITIES EXCHANGE ACT OF 1934 | | | | | |  | | |
+    |  | | |  | | |  | | |  | | |
+    |  | | | For the transition period from                  to | | | | | |  | | |
+
+      
+    Commission file number: 1-8606 Verizon Communications Inc. (Exact name of registrant as specified in its charter)
+
+    |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    | Delaware | | | | | |  | | | 23-2259884 | | |
+    | (State or other jurisdictionof incorporation or organization) | | | | | |  | | | (I.R.S. Employer Identification No.) | | |
+    |  | | |  | | |  | | |  | | |
+    | 1095 Avenue of the Americas | | | | | |  | | |  | | |
+    | New York, | | | New York | | |  | | | 10036 | | |
+    | (Address of principal executive offices) | | | | | |  | | | (Zip Code) | | |
+
+    Registrant's telephone number, including area code: (212)  395-1000   
+    Securities registered pursuant to Section  12(b) of the Act:  
+
+
+    |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    | Title of Each Class | | |  | | | Trading Symbol(s) | | |  | | | Name of Each Exchange on Which Registered | | |
+    | Common Stock, par value $0.10 | | |  | | | VZ | | |  | | | New York Stock Exchange | | |
+    | Common Stock, par value $0.10 | | |  | | | VZ | | |  | | | The Nasdaq Global Select Market | | |
+    | 1.625% Notes due 2024 | | |  | | | VZ 24B | | |  | | | New York Stock Exchange | | |
+    | 4.073% Notes due 2024 | | |  | | | VZ 24C | | |  | | | New York Stock Exchange | | |
+    | 0.875% Notes due 2025 | | |  | | | VZ 25 | | |  | | | New York Stock Exchange | | |
+    | 3.25% Notes due 2026 | | |  | | | VZ 26 | | |  | | | New York Stock Exchange | | |
+    | 1.375% Notes due 2026 | | |  | | | VZ 26B | | |  | | | New York Stock Exchange | | |
+    | 0.875% Notes due 2027 | | |  | | | VZ 27E | | |  | | | New York Stock Exchange | | |
+    | 1.375% Notes due 2028 | | |  | | | VZ 28 | | |  | | | New York Stock Exchange | | |
+    | 1.125% Notes due 2028 | | |  | | | VZ 28A | | |  | | | New York Stock Exchange | | |
+    | 2.350% Fixed Rate Notes due 2028 | | |  | | | VZ 28C | | |  | | | New York Stock Exchange | | |
+    | 1.875% Notes due 2029 | | |  | | | VZ 29B | | |  | | | New York Stock Exchange | | |
+    | 0.375% Notes due 2029 | | |  | | | VZ 29D | | |  | | | New York Stock Exchange | | |
+    | 1.250% Notes due 2030 | | |  | | | VZ 30 | | |  | | | New York Stock Exchange | | |
+    | 1.875% Notes due 2030 | | |  | | | VZ 30A | | |  | | | New York Stock Exchange | | |
+    | 4.250% Notes due 2030 | | |  | | | VZ 30D | | |  | | | New York Stock Exchange | | |
+    | 2.625% Notes due 2031 | | |  | | | VZ 31 | | |  | | | New York Stock Exchange | | |
+    | 2.500% Notes due 2031 | | |  | | | VZ 31A | | |  | | | New York Stock Exchange | | |
+    | 3.000% Fixed Rate Notes due 2031 | | |  | | | VZ 31D | | |  | | | New York Stock Exchange | | |
+    | 0.875% Notes due 2032 | | |  | | | VZ 32 | | |  | | | New York Stock Exchange | | |
+    | 0.750% Notes due 2032 | | |  | | | VZ 32A | | |  | | | New York Stock Exchange | | |
+    | 1.300% Notes due 2033 | | |  | | | VZ 33B | | |  | | | New York Stock Exchange | | |
+    | 4.75% Notes due 2034 | | |  | | | VZ 34 | | |  | | | New York Stock Exchange | | |
+    | 4.750% Notes due 2034 | | |  | | | VZ 34C | | |  | | | New York Stock Exchange | | |
+    | 3.125% Notes due 2035 | | |  | | | VZ 35 | | |  | | | New York Stock Exchange | | |
+    | 1.125% Notes due 2035 | | |  | | | VZ 35A | | |  | | | New York Stock Exchange | | |
+
+      
+
+
+    ---
+
+      
+
+
+    |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    | Securities registered pursuant to Section  12(b) of the Act (continued): | | | | | | | | | | | | | | |
+    | Title of Each Class | | |  | | | Trading Symbol(s) | | |  | | | Name of Each Exchange on Which Registered | | |
+    | 3.375% Notes due 2036 | | |  | | | VZ 36A | | |  | | | New York Stock Exchange | | |
+    | 2.875% Notes due 2038 | | |  | | | VZ 38B | | |  | | | New York Stock Exchange | | |
+    | 1.875% Notes due 2038 | | |  | | | VZ 38C | | |  | | | New York Stock Exchange | | |
+    | 1.500% Notes due 2039 | | |  | | | VZ 39C | | |  | | | New York Stock Exchange | | |
+    | 3.50% Fixed Rate Notes due 2039 | | |  | | | VZ 39D | | |  | | | New York Stock Exchange | | |
+    | 1.850% Notes due 2040 | | |  | | | VZ 40 | | |  | | | New York Stock Exchange | | |
+    | 3.850% Fixed Rate Notes due 2041 | | |  | | | VZ 41C | | |  | | | New York Stock Exchange | | |
+
+      
+    Securities registered pursuant to Section  12(g) of the Act: None  
+    Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of the Securities Act.       Yes          NoIndicate by check mark if the registrant is not required to file reports pursuant to Section  13 or Section  15(d) of the Act.     Yes          No Indicate by check mark whether the registrant (1)  has filed all reports required to be filed by Section  13 or 15(d) of the Securities Exchange Act of 1934 during the preceding 12 months (or for such shorter period that the registrant was required to file such reports), and (2)  has been subject to such filing requirements for the past 90 days.     Yes          NoIndicate by check mark whether the registrant has submitted electronically every Interactive Data File required to be submitted pursuant to Rule 405 of Regulation S-T ( §232.405 of this chapter) during the preceding 12 months (or for such shorter period that the registrant was required to submit such files).     Yes          NoIndicate by check mark whether the registrant is a large accelerated filer, an accelerated filer, a non-accelerated filer, a smaller reporting company, or an emerging growth company. See the definitions of "large accelerated filer," "accelerated filer," "smaller reporting company," and "emerging growth company" in Rule 12b-2 of the Exchange Act.
+
+    |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    |  | | | Large accelerated filer | | |  | | |  | | | Accelerated filer | | |  | | |
+    |  | | | Non-accelerated filer | | |  | | |  | | | Smaller  reporting  company | | |  | | |
+    |  | | |  | | |  | | |  | | | Emerging growth company | | |  | | |
+
+    If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. Indicate by check mark whether the registrant has filed a report on and attestation to its management's assessment of the effectiveness of its internal control over financial reporting under Section 404(b) of the Sarbanes-Oxley Act (15 U.S.C. 7262(b)) by the registered public accounting firm that prepared or issued its audit report.  If securities are registered pursuant to Section 12(b) of the Act, indicate by check mark whether the financial statements of the registrant included in the filing reflect the correction of an error to previously issued financial statements. Indicate by check mark whether any of those error corrections are restatements that required a recovery analysis of incentive-based compensation received by any of the registrant's executive officers during the relevant recovery period pursuant to  §240.10D-1(b). Indicate by check mark whether the registrant is a shell company (as defined in Rule 12b-2 of the Act).     Yes          NoAt June  30, 2022, the aggregate market value of the registrant's voting stock held by non-affiliates was approximately $213,158,526,305.At January  31, 2023, 4,199,882,937 shares of the registrant's common stock were outstanding, after deducting 91,550,709 shares held in treasury.  
+    Documents Incorporated By Reference:Portions of the registrant's definitive Proxy Statement to be delivered to shareholders in connection with the registrant's 2023 Annual Meeting of Shareholders (Part III).  
+
+
+    ---
+
+      
+    TABLE OF CONTENTS
+
+    |  |  |  |  |  |  |  |  |  |
+    | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+    | Item  No. | | |  | | | Page | | |
+    |  | | |  | | |  | | |
+    | PART I | | |  | | |  | | |
+    |  | | |  | | |  | | |
+    | Item  1. | | | [Business](#i3b787490285c4e13a4f3d7ac7775fbca_13) | | | [4](#i3b787490285c4e13a4f3d7ac7775fbca_13) | | |
+    |  | | |  | | |  | | |
+    | Item  1A. | | | [Risk Factors](#i3b787490285c4e13a4f3d7ac7775fbca_58) | | | [14](#i3b787490285c4e13a4f3d7ac7775fbca_58) | | |
+    |  | | |  | | |  | | |
+    | Item  1B. | | | [Unresolved Staff Comments](#i3b787490285c4e13a4f3d7ac7775fbca_61) | | | [18](#i3b787490285c4e13a4f3d7ac7775fbca_61) | | |
+    |  | | |  | | |  | | |
+    | Item  2. | | | [Properties](#i3b787490285c4e13a4f3d7ac7775fbca_64) | | | [19](#i3b787490285c4e13a4f3d7ac7775fbca_64) | | |
+    |  | | |  | | |  | | |
+    | Item  3. | | | [Legal Proceedings](#i3b787490285c4e13a4f3d7ac7775fbca_67) | | | [19](#i3b787490285c4e13a4f3d7ac7775fbca_67) | | |
+    |  | | |  | | |  | | |
+    | Item  4. | | | [Mine Safety Disclosures](#i3b787490285c4e13a4f3d7ac7775fbca_70) | | | [19](#i3b787490285c4e13a4f3d7ac7775fbca_70) | | |
+    |  | | |  | | |  | | |
+    | PART II | | |  | | |  | | |
+    |  | | |  | | |  | | |
+    | Item  5. | | | [Market for Registrant's Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities](#i3b787490285c4e13a4f3d7ac7775fbca_76) | | | [20](#i3b787490285c4e13a4f3d7ac7775fbca_76) | | |
+    |  | | |  | | |  | | |
+    | Item  6. | | | [[Reserved]](#i3b787490285c4e13a4f3d7ac7775fbca_79) | | | [20](#i3b787490285c4e13a4f3d7ac7775fbca_79) | | |
+    |  | | |  | | |  | | |
+    | Item  7. | | | [Management's Discussion and Analysis of Financial Condition and Results of Operations](#i3b787490285c4e13a4f3d7ac7775fbca_85) | | | [21](#i3b787490285c4e13a4f3d7ac7775fbca_85) | | |
+    |  | | |  | | |  | | |
+    | Item  7A. | | | [Quantitative and Qualitative Disclosures About Market Risk](#i3b787490285c4e13a4f3d7ac7775fbca_166) | | | [48](#i3b787490285c4e13a4f3d7ac7775fbca_166) | | |
+    |  | | |  | | |  | | |
+    | Item  8. | | | [Financial Statements and Supplementary Data](#i3b787490285c4e13a4f3d7ac7775fbca_169) | | | [51](#i3b787490285c4e13a4f3d7ac7775fbca_169) | | |
+    |  | | |  | | |  | | |
+    | Item  9. | | | [Changes in and Disagreements with Accountants on Accounting and Financial Disclosure](#i3b787490285c4e13a4f3d7ac7775fbca_283) | | | [107](#i3b787490285c4e13a4f3d7ac7775fbca_283) | | |
+    |  | | |  | | |  | | |
+    | Item  9A. | | | [Controls and Procedures](#i3b787490285c4e13a4f3d7ac7775fbca_286) | | | [107](#i3b787490285c4e13a4f3d7ac7775fbca_286) | | |
+    |  | | |  | | |  | | |
+    | Item  9B. | | | [Other Information](#i3b787490285c4e13a4f3d7ac7775fbca_298) | | | [107](#i3b787490285c4e13a4f3d7ac7775fbca_298) | | |
+    |  | | |  | | |  | | |
+    | Item  9C. | | | [Disclosure Regarding Foreign Jurisdictions that Prevent Inspections](#i3b787490285c4e13a4f3d7ac7775fbca_301) | | | [107](#i3b787490285c4e13a4f3d7ac7775fbca_301) | | |
+    |  | | |  | | |  | | |
+    | PART  III | | |  | | |  | | |
+    |  | | |  | | |  | | |
+    | Item  10. | | | [Directors, Executive Officers and Corporate Governance](#i3b787490285c4e13a4f3d7ac7775fbca_307) | | | [108](#i3b787490285c4e13a4f3d7ac7775fbca_307) | | |
+    |  | | |  | | |  | | |
+    | Item  11. | | | [Executive Compensation](#i3b787490285c4e13a4f3d7ac7775fbca_310) | | | [108](#i3b787490285c4e13a4f3d7ac7775fbca_310) | | |
+    |  | | |  | | |  | | |
+    | Item  12. | | | [Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters](#i3b787490285c4e13a4f3d7ac7775fbca_313) | | | [108](#i3b787490285c4e13a4f3d7ac7775fbca_313) | | |
+    |  | | |  | | |  | | |
+    | Item  13. | | | [Certain Relationships and Related Transactions, and Director Independence](#i3b787490285c4e13a4f3d7ac7775fbca_316) | | | [109](#i3b787490285c4e13a4f3d7ac7775fbca_316) | | |
+    |  | | |  | | |  | | |
+    | Item  14. | | | [Principal Accounting Fees and Services](#i3b787490285c4e13a4f3d7ac7775fbca_319) | | | [109](#i3b787490285c4e13a4f3d7ac7775fbca_319) | | |
+    |  | | |  | | |  | | |
+    | PART  IV | | |  | | |  | | |
+    |  | | |  | | |  | | |
+    | Item  15. | | | [Exhibits and Financial Statement Schedules](#i3b787490285c4e13a4f3d7ac7775fbca_325) | | | [110](#i3b787490285c4e13a4f3d7ac7775fbca_325) | | |
+    |  | | |  | | |  | | |
+    | Item 16. | | | [Form 10-K Summary](#i3b787490285c4e13a4f3d7ac7775fbca_334) | | | [114](#i3b787490285c4e13a4f3d7ac7775fbca_334) | | |
+    |  | | |  | | |  | | |
+    | [Signatures](#i3b787490285c4e13a4f3d7ac7775fbca_337) | | | | | | [114](#i3b787490285c4e13a4f3d7ac7775fbca_337) | | |
+    |  | | | | | |  | | |
+    | Certifications | | | | | |  | | |
+
+      
+
+
+    ---
+
+    [Table of Contents](#i3b787490285c4e13a4f3d7ac7775fbca_7)
+
+    |  |  |  |
+    | --- | --- | --- |
+    | PART I | | |
+
+      
+
+
+    |  |  |  |
+    | --- | --- | --- |
+    | Item  1.        Business | | |
+
+
+
+    |  |  |  |
+    | --- | --- | --- |
+
+        | General | | |
+
+    Verizon Communications Inc. (the Company) is a holding company that, acting through its subsidiaries (together with the Company, collectively, Verizon), is one of the world's leading providers of communications, technology, information and entertainment products and services to consumers, businesses and government entities. With a presence around the world, we offer data, video and voice services and solutions on our networks and platforms that are designed to meet customers' demand for mobility, reliable network connectivity, security and control.  
+    Our principal executive offices are located at 1095 Avenue of the Americas, New York, New York 10036 (telephone number 212-395-1000).  
+    We have two reportable segments that we operate and manage as strategic business units - Verizon Consumer Group (Consumer) and Verizon Business Group (Business).  
+    Verizon Consumer GroupOur Consumer segment provides consumer-focused wireless and wireline communications services and products. Our wireless services are provided across one of the most extensive wireless networks in the United States (U.S.) under the Verizon brand, TracFone Wireless, Inc. (TracFone) brands and through wholesale and other arrangements. We also provide fixed wireless access (FWA) broadband through our wireless networks. Our wireline services are provided in nine states in the Mid-Atlantic and Northeastern U.S., as well as Washington D.C., over our 100% fiber-optic network through our Verizon Fios product portfolio and over a traditional copper-based network to customers who are not served by Fios.   
+    In 2022, the Consumer segment's revenues were $103.5 billion, representing approximately 76% of Verizon's consolidated revenues. As of December  31, 2022, Consumer had approximately 115 million wireless retail connections, of which 80% are postpaid connections (including FWA). In addition, at December  31, 2022 Consumer had approximately 8  million total broadband connections (which includes Fios internet, Digital Subscriber Line (DSL) and FWA connections), and approximately 3  million Fios video connections.  
+    Verizon Business GroupOur Business segment provides wireless and wireline communications services and products, including data, video and conferencing services, corporate networking solutions, security and managed network services, local and long distance voice services and network access to deliver various Internet of Things (IoT) services and products. We also provide FWA broadband through our wireless networks. We provide these products and services to businesses, government customers and wireless and wireline carriers across the U.S. and select products and services to customers around the world.   
+    In 2022, the Business segment's revenues were $31.1  billion, representing approximately 23% of Verizon's consolidated revenues. As of December  31, 2022, Business had approximately 29  million wireless retail postpaid connections and approximately 1 million total broadband connections (which includes Fios internet, DSL and FWA connections).  
+    Additional discussion of our reportable segments is included in Item 7. under the headings "Management's Discussion and Analysis of Financial Condition and Results of Operations - Overview" and - "Segment Results of Operations" and in Note 13 to the consolidated financial statements of Verizon Communications Inc. and Subsidiaries.  
+
+
+    |  |  |  |
+    | --- | --- | --- |
+    | Service and Product Offerings | | |
+
+    Our Consumer segment's wireless and wireline products and services are available to our retail customers, as well as resellers that purchase wireless network access from us on a wholesale basis. Our Business segment's wireless and wireline products and services are organized by the primary customer groups targeted by these offerings: Small and Medium Business, Global Enterprise, Public Sector and Other, and Wholesale.  
+    WirelessWe offer wireless services and equipment to both Consumer customers and Business customers.  
+    Wireless ServicesOur Consumer and Business segments provide a wide variety of wireless services accessible on a broad range of devices. Customers can obtain our wireless services on a postpaid or prepaid basis. Retail (non-wholesale) postpaid accounts primarily represent retail customers that are directly served and managed by Verizon and use Verizon branded services. A single account may include monthly wireless services for a variety of connected devices. Our postpaid service is generally billed one month in 4
+
+    ---
+
+    [Table of Contents](#i3b787490285c4e13a4f3d7ac7775fbca_7)advance for a monthly access charge in return for access to and usage of network services. Our prepaid service is offered only to Consumer customers and enables individuals to obtain wireless services without credit verification by paying for all services in advance. As of December 31, 2022, we had 92 million postpaid connections, including FWA, and 23 million prepaid connections, representing approximately 80% and 20% of our Consumer wireless retail connections, respectively.   
+    Access to the internet is available on all smartphones and nearly all basic phones. In addition, our customers can access the internet at broadband speeds on notebook computers and tablets that are either wireless-enabled or that are used in conjunction with separate dedicated devices that provide a mobile Wi-Fi connection.  
+
+        </Document>
+        <Question>What are Verizon's business segments?</Question> 
+      
+        <Output>
+          <summary>1. Document Type: 10K Filing
+    2. Company and Ticker: Verizon Communications Inc. (VZ)
+    3. Filing Date: This document appears to be for the fiscal year ending December 31, 2022. However, the exact filing date is not clear from the provided excerpt.
+    4. Quarter and Year: Fiscal Year 2022 (ending December 31, 2022)
+    5. Brief Summary:
+    This document is an annual report (Form 10-K) filed by Verizon Communications Inc. with the Securities and Exchange Commission. It provides a comprehensive overview of Verizon's business operations, financial performance, risk factors, and management's discussion and analysis.
+    The report details Verizon's two reportable segments:
+    Verizon Consumer Group: This segment focuses on providing wireless and wireline communication services and products to consumers. It includes offerings like mobile plans, Fios internet and video services, and DSL.
+    Verizon Business Group: This segment caters to businesses, government entities, and wholesale customers, offering services such as data, video conferencing, corporate networking solutions, and IoT services.
+    The document also provides information on Verizon's various service and product offerings, including wireless services, internet access, and mobile Wi-Fi. It highlights the company's extensive wireless network coverage in the U.S. and its 100% fiber-optic network for Fios services.
+    </summary>
+          <summary_reasoning>The question asks about Verizon's business segments. The document provides information about Verizon's business. Therefore, the summary will include the Veriozon’s business segment details</summary_reasoning>
+        </Output>
+      </Examples>
+
+      <Instructions>
+        - Limit the number of sentences in summary to 5-6 sentences max.
+        - Keep all the details that help to answer the question in the summary.
+        - If the document does not have details that can help to answer the question, the summary should be "The document does not provide details to answer the question".
+        - Use reasoning and step-by-step thinking, provide a summary_reasoning to justify your response.
+        - Provide the JSON response.
+        - Response format - all the fields need to be returned as strings. 
+          {{
+            "summary": <Summary of the document with respect to the question>
+            "summary_reasoning": "<Step by step reasoning about what should be included in summary with respect to the question>",
+          }}
+
+      </Instructions>
+
+      Now it's your turn!
+      <Document>{retrieved_doc}</Document>
+      <Question>{question}</Question>
+
 
 
 retriever_scoring_prompt: |
@@ -93,17 +289,17 @@ retriever_scoring_prompt: |
 
   <Examples>
     <Example>
-      <Document>
-        3D mammograms are covered by the standard benefit plan for both preventive and diagnostic testing. 
-        Coverage includes codes 77061, 77062, 77063, and G2079, even if the description does not specify "3D". 
-        No specific diagnosis is required for coverage. For fully-insured plans, coverage is assured when a valid code is billed. 
-        For ASO plans, coverage is granted when the AVA/ACET does not explicitly exclude 3D mammograms and a valid code is billed.
-      </Document>
-      <Question>My doctor is recommending I start having a 3D mammography for my routine mammogram screenings. Are those covered?</Question> 
+      <Document_Snippet>
+        Verizon Communications Inc. (the Company) is a holding company that, acting through its subsidiaries (together with the Company, collectively, Verizon), is one of the world's leading providers of communications, technology, information and entertainment products and services to consumers, businesses and government entities. With a presence around the world, we offer data, video and voice services and solutions on our networks and platforms that are designed to meet customers' demand for mobility, reliable network connectivity, security and control.  
+        Our principal executive offices are located at 1095 Avenue of the Americas, New York, New York 10036 (telephone number 212-395-1000).  
+        We have two reportable segments that we operate and manage as strategic business units - Verizon Consumer Group (Consumer) and Verizon Business Group (Business).  
+        Verizon Consumer GroupOur Consumer segment provides consumer-focused wireless and wireline communications services and products. Our wireless services are provided across one of the most extensive wireless networks in the United States (U.S.) under the Verizon brand, TracFone Wireless, Inc. (TracFone) brands and through wholesale and other arrangements. We also provide fixed wireless access (FWA) broadband through our wireless networks. Our wireline services are provided in nine states in the Mid-Atlantic and Northeastern U.S., as well as Washington D.C., over our 100% fiber-optic network through our Verizon Fios product portfolio and over a traditional copper-based network to customers who are not served by Fios.   
+      </Document_Snippet>
+      <Question>What are Verizon's business segments?</Question> 
       <Output>
         {{
           "relevancy_score": 5,
-          "relevancy_reasoning": "The question concerns the coverage of 3D mammograms. The document explicitly states that 3D mammograms are covered, listing specific codes. Thus, the document is highly relevant to the question posed."
+          "relevancy_reasoning": "The question is regarding business segments of Verizon. The document explicitly states that Verizon has two reportable segments that they operate and manage as strategic business units - Verizon Consumer Group (Consumer) and Verizon Business Group (Business). "
         }}
       </Output>
     </Example>
@@ -131,24 +327,25 @@ retriever_scoring_prompt: |
   <Document>{retrieved_doc}</Document>
   <Question>{question}</Question>
 
+
 answer_scoring_prompt: |
-  You are a professional answer scorer. You receive the question and the answer. Your mission is to say how helpful is the answer to the question.
+  You are a professional answer scorer. You receive the question and the answer. Your mission is to say how helpful the answer is to the question.
   <Examples>
     <Question>
-      My doctor is recommending I start having a 3D mammography for my routine mammogram screengings. Are those covered?
+      What are Verizon's business segments?
     </Question>
     <Answer>
-      Preventive 3D Mammography is covered. When received INN, there is no charge and no deductible applies; prior authorization is not required to receive this care.
+      Verizon has two reportable business segments: Verizon Consumer Group and Verizon Business Group 
     </Answer>
     <Output>
       <helpfullness_score>5</helpfullness_score>
-      <answer_helpfullness_resoning>The question asks about coverage details for 3D mammograms. The answer is helpful and complete.</answer_helpfullness_resoning>
+      <answer_helpfullness_resoning>The question asks about Verizon’s business units. The answer is helpful and complete.</answer_helpfullness_resoning>
     </Output>
   </Examples>
 
   <Instructions>
     - Look at the question and answer and return helpfullness_score for the answer. It should be a number between 1 and 5.
-    - Use reasoning and step-by-step thinking, provide a answer_helpfullness_resoning to justify your response.
+    - Use reasoning and step-by-step thinking, provide a answer_helpfullness_reasoning to justify your response.
     - The output MUST BE A VALID JSON object. This requires the following:
       - Ensure that the JSON structure includes curly braces at the beginning and end of the object.
       - Use double quotes for all keys and string values.
@@ -168,6 +365,7 @@ answer_scoring_prompt: |
   Now it's your turn!
   <Question>{question}</Question>
   <Answer>{answer}</Answer>
+
 
 
 json_corrector_prompt: |
@@ -194,11 +392,12 @@ similar_questions_prompt: |
 
   <Examples>
     <Question>
-      My doctor is recommending I start having a 3D mammography for my routine mammogram screengings. Are those covered?
+      What are Verizon's business segments?
     </Question>
     <Output>
-      Is 3D mammography covered in my insurance plan?
-      Does my plan cover breast imaging procedures?
+      How is Verizon's revenue distributed across its different business segments?
+      Which business segment is the most profitable for Verizon? 
+
     </Output>
   </Examples>
 
@@ -206,13 +405,12 @@ similar_questions_prompt: |
     - If the question is very short, anticipate what else they may want to know.
     - Include some keywords related to the topic but not mentioned in the question, if these keywords will be useful in retrieving relevant documents from the process and procedure documents.
     - Return only the similar questions without any introductory text.
-    - Limit the number of similar questions to {similar_questions_number}.
+    - Limit the number of similar questions to 2.
     - Do not output numbers in front of questions. Do not output "-" symbol in front of questions.
     - Separate questions with "?" symbol.
   </Instructions>
  
   Here is the question asked by an employee: {question}?
-
 simple_react_chain_prompt: |
   You will be given context, which contains documents. You will need to answer the question based on the context.
   Here is the context: {context}
@@ -225,24 +423,23 @@ simple_react_chain_prompt: |
     "additional_information_to_retrieve": "",
     "context_used": ""
   }}
-
 react_chain_prompt: |
-  You are a smart, friendly and helpful chatbot for United Healthcare. 
-  United Healthcare sells health insurance plans for individuals and employer groups. 
-  You need to answer any questions asked by the United Healthcare employees, specifically their Customer Advocates who provide accurate responses to their customer questions related to their policy benefits and any limitations.
-  You will be answering a question in one of multiple rounds. 
-  If this is not the first round, you will be given the JSON response created by chatbots in previous rounds for the same question. 
-  Use this information to plan your answer and improve upon the answer given in the previous rounds. 
-  The JSON response you provide will be included in subsequent rounds, along with additional context retrieved from the United Healthcare’s benefits and policy documents that can be used to generate a more complete and helpful answer. 
-  So, while coming up with the JSON response, think about both how to answer the question well immediately (given all information you have now), as well as any additional information that will help another chatbot answer the question better in the next round. 
-  Analyze the question, and determine if the question is a benefits related question or eligibility related question.
+  You are a smart, friendly and helpful chatbot for FactSet. 
+  FactSet, is an American financial data and software company that provides integrated financial data such as quarterly filings like 8K, 10K etc, earnings transcript reports, Street Account news services etc. and software. 
+  You need to answer any questions asked by the FactSet employees, their customers who are conducting research and expect accurate responses to their questions related to various financial reports such as 10K, earnings transcript and street account news.
+  You will be answering a question in one or multiple rounds. 
+  If this is not the first round, you will be given the JSON response created in the previous round for the same question. 
+  Use this information to plan your answer and improve upon the answer given in the previous round. 
+  The JSON response you provide will be included in subsequent round, if needed, along with additional context retrieved from the financial documents such as 10K, earnings transcript and street account news that can be used to generate a more complete and accurate answer. 
+  So, while coming up with the JSON response, think about both how to answer the question well immediately (given all information you have now), as well as any additional information that will help answer the question better in the next round, if needed. 
+  Analyze the question, and determine if the question is a 10K filing related question or earnings transcript related question or a street account news related question or it could be a combination of two or more categories of documents.
   You will be given the following information:
-  1. The question asked by the employee.
-  2. If this is not the first round: JSON response is created in previous rounds of answering
+  1. The question asked by the employee or a customer.
+  2. If this is not the first round: JSON response is created in previous round of answering
       this question. In addition to the fields in the JSON response, they contain other fields:
       plan_and_summaries, round_number, additional_information_to_retrieve.
-  3. Context: Documents that were retrieved from United Healthcare database. Documents are separated with the string "~~~~~Document Separator~~~~~". Each Document has an assigned Relevancy Score from 0 to 5.
-     When generating the answer try to focus more on the most relevant documents, ie the documents that have higher Relevancy Scores.
+  3. Context: Documents that were retrieved from FactSet database. Documents are separated with the string "~~~~~Document Separator~~~~~". Each Document has an assigned Relevancy Score from 0 to 5.
+     When generating the answer try to focus more on the most relevant documents, i.e. the documents that have higher Relevancy Score.
 
   You need to provide the following response in JSON format:
   {{
@@ -252,32 +449,26 @@ react_chain_prompt: |
     "context_used": ""
   }}
   DO NOT include any annotations or extraneous text in your output, such as "json```\n". Your output should only be the valid JSON string.
-  The response wil be parsed with json.loads(response), so it just must be valid correct JSON.
+  The response will be parsed with json.loads(response), so it just must be valid and correct JSON.
 
   1. plan_and_summaries: Your plan for how to create a helpful and detailed answer to the question, as well as any short summaries of the information useful for answering this question. 
      Include information you already have and information that is missing. 
      If it is not possible to create a complete answer with the information you have, include what documents you need to retrieve to create a complete answer. 
-     This can be helpful to the next round chatbot. Only include summaries that are useful and have not been included in other parts of the JSON response such as the answer and context_used fields.
-  2. answer: A helpful, detailed, and accurate answer to the question asked by the Customer Advocate, based on the facts given. 
-     Think from the perspective of a Customer Advocate trying to accurately answer a policy holder's question, and include all the information that will be helpful, as described below:
-     Include both INN (In-Network) benefits and OON (Out-of-Network) benefits and clearly segregate the benefits, so that there is no confusion.
-     Include complete information such as but not limited to:
-        - Eligible or covered expenses
-        - Copayment dollar amounts per individual, including cost savings options
-        - Deductible dollar amounts per individual, including cost savings options
-        - Note: Review deductible verbiage to see if a cumulative deductible applies.
-        - Coinsurance amount
-        - Specify the benefits by place of service, provide the member's cost share for all places of service.
-        - Treat a clinic as a place of service = Office 
-        - Any notification requirements
-        - Any referral requirements
-        - Any prior authorization requirements
-        - Any exclusions
-        - Any provider licensing or certification requirements
-        - Any patient age or gender requirements/restrictions
-        - Any visit limits per a specific time frame
-        - Any dollar limitations per a specific time frame
-        - Combined limitations 
+     This can be helpful to the next round. Only include summaries that are useful and have not been included in other parts of the JSON response such as the answer and context_used fields.
+  2. answer: A helpful, detailed, and accurate answer to the question asked by the employees or customers, based on the facts given. 
+     Think from the perspective of a questioner trying to accurately research and analyze a company’s financial performance, and include all the information that will be helpful, as described below:
+     
+     Include only the information that was asked in the question, similar to:
+    Financial Performance: Analyze trends in revenue, profitability, and cash flow over time to assess the company's financial health and growth potential.
+    Risk Factors: Identify potential risks and uncertainties that could impact the company's future performance, such as economic conditions, competition, and regulatory changes.
+    Management Discussion and Analysis (MD&A): Gain insights into management's perspective on the company's performance, future outlook, and strategic initiatives.
+    Management Commentary: Understand management's explanations for past performance, future expectations, and responses to analyst questions, which can reveal valuable insights not found in the financial statements.
+    Industry Trends: Learn about industry-specific trends and challenges discussed by management, providing context for the company's performance and future prospects.
+    Forward-Looking Statements: Pay close attention to management's projections and guidance for future periods, which can help analysts refine their financial models and forecasts.
+    Analyst Ratings and Price Targets: Track changes in analyst sentiment and price targets to gauge the market's perception of the company's value and future potential.
+    Market-Moving News: Stay informed about significant news events that could impact the company's stock price, such as earnings releases, mergers and acquisitions, and regulatory developments.
+    Activist Investor Activity: Monitor any involvement of activist investors who may push for changes in the company's strategy or management, potentially influencing its future direction.
+
 
   3. additional_information_to_retrieve: Based on the answer, and plan and summaries return the follow up question that the person would ask about the information missing.
   4. context_used: Include only the relevant context with the document name and a maximum of few sentences. 
@@ -289,159 +480,72 @@ react_chain_prompt: |
   extra new lines have been added for readability. In your response ensure that the JSON formatting is correct.
   
   Example 1. 
-  This is the first round for the question "It's been a few months since my mastectomy was performed. Do I still qualify for supply coverage? Can I still get a bra now?" and the context includes "Women's Health and Cancer Rights Act of 1998:Prostheses and physical complications must be paid through all stages of mastectomy, including lymphedema.
-  Benefits may be subject to annual deductibles and coinsurance consistent with those established for other benefits under the plan of coverage.
-  Mandate requires coverage for post-mastectomy supplies, related bras and lymphedema arm stockings.
-  Carrier may not limit the number of prostheses obtained in connection with a mastectomy and breast reconstruction.
-  Federal law does not place a time limit on when the mastectomy was performed or when the individual undergoes reconstructive surgery, it follows that no limitations can be placed on the number of prostheses covered by the plan:
-  No limitation for number of prostheses, bras, and prosthetic devices that must be covered; nor limit the number (bras, etc.) purchased at one time.
-  Applies to any enrollee who has had a mastectomy regardless of the diagnosis (i.e., does not have to be cancer-related).
-  Applies when mastectomy was performed while enrollee was covered by a previous insurance carrier.". 
+  This is the first round for the question "What are Verizon's top operating expenses?" and the context includes "Operating Expenses
+
+        |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | | |  | | |  |  |  |  |  |  |  |  |  |  | | |  | | |  | | |  | | |
+        | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+        |  | | |  | | |  | | |  | | |  | | |  | | |  | | | (dollars in millions) | | | | | | | | |
+        |  | | |  | | |  | | |  | | |  | | |  | | |  | | | Increase/(Decrease) | | | | | | | | |
+        | Years Ended December  31, | | | 2022 | | |  | | | 2021 | | |  | | |  | | |  | | | 2022 vs. 2021 | | | | | | | | |  | | |  | | |
+        | Cost of services | | | $ | 17,746 |  |  | | | $ | 16,581 |  |  | | |  | | |  | | | $ | 1,165 |  |  | | | 7.0 | | % |  | | |  | | |  | | |  | | |
+        | Cost of wireless equipment | | | 25,134 | |  |  | | | 20,523 | |  |  | | |  | | |  | | | 4,611 | |  |  | | | 22.5 | |  |  | | |  | | |  | | |  | | |
+        | Selling, general and administrative expense | | | 19,064 | |  |  | | | 16,562 | |  |  | | |  | | |  | | | 2,502 | |  |  | | | 15.1 | |  |  | | |  | | |  | | |  | | |
+        | Depreciation and amortization expense | | | 12,716 | |  |  | | | 11,679 | |  |  | | |  | | |  | | | 1,037 | |  |  | | | 8.9 | |  |  | | |  | | |  | | |  | | |
+        | Total Operating Expenses | | | $ | 74,660 |  |  | | | $ | 65,345 |  |  | | |  | | |  | | | $ | 9,315 |  |  | | | 14.3 | |  |  | | |  | | |  | | |  | | |
+
+                
+      Cost of ServicesCost of services increased during 2022 compared to 2021 primarily due to:â€¢an increase in access costs of $848 million primarily due to the inclusion of TracFone results; andâ€¢an increase in rent expense of $198 million related to adding capacity to the networks to support demand and lease modifications for certain existing cell towers in April 2021 in connection with the build out of our 5G wireless network.  
+      Cost of Wireless EquipmentCost of wireless equipment increased during 2022 compared to 2021 primarily due to:â€¢an increase of $2.2 billion due to the inclusion of TracFone results;30
+
+      ---
+
+      [Table of Contents](#i3b787490285c4e13a4f3d7ac7775fbca_7)â€¢an increase of $1.5 billion driven by a higher volume of wireless devices sold, primarily related to a higher rate of upgrades; andâ€¢an increase of $1.0 billion related to a shift to higher priced equipment in the mix of wireless devices sold.   
+      Selling, General and Administrative ExpenseSelling, general and administrative expense increased during 2022 compared to 2021 primarily due to:â€¢an increase in personnel costs of $1.3 billion primarily due to the inclusion of TracFone results and increased third-party employee costs due to contracted services;â€¢an increase in provision for credit losses of $745 million driven by increased device payment loan volume and an increase in the expected loss rate primarily as a result of the change in device payment plan terms to 36 months, as well as actions taken in prior years in response to the COVID-19 pandemic; andâ€¢an increase in advertising expense of $454 million primarily due to the inclusion of TracFone results and brand marketing, including the launch of the 5G Ultra campaign in early 2022.  
+      Depreciation and Amortization ExpenseDepreciation and amortization expense increased during 2022 compared to 2021, driven by the change in the mix of total Verizon depreciable and amortizable assets and Consumer's usage of those assets. " 
 
   The JSON response should be:
         {{
            "plan_and_summaries": "I have the question and the answer. The answer is very
            clear and I do not need any additional information to answer the question fully.",
-           "answer": "There isn't a time limit based on when the mastectomy or reconstructive surgery was performed.",
+           "answer": "Cost of services, Cost of wireless equipment, Selling, general and administrative expense, and Depreciation and amortization expense",
           "additional_information_to_retrieve": "",
-           "context_used": "Mastectomy Supplies
+           "context_used": "Operating Expenses
 
-  **Women's Health and Cancer Rights Act of 1998:**
-  =================================================
+                |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | | |  | | |  |  |  |  |  |  |  |  |  |  | | |  | | |  | | |  | | |
+                | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+                |  | | |  | | |  | | |  | | |  | | |  | | |  | | | (dollars in millions) | | | | | | | | |
+                |  | | |  | | |  | | |  | | |  | | |  | | |  | | | Increase/(Decrease) | | | | | | | | |
+                | Years Ended December  31, | | | 2022 | | |  | | | 2021 | | |  | | |  | | |  | | | 2022 vs. 2021 | | | | | | | | |  | | |  | | |
+                | Cost of services | | | $ | 17,746 |  |  | | | $ | 16,581 |  |  | | |  | | |  | | | $ | 1,165 |  |  | | | 7.0 | | % |  | | |  | | |  | | |  | | |
+                | Cost of wireless equipment | | | 25,134 | |  |  | | | 20,523 | |  |  | | |  | | |  | | | 4,611 | |  |  | | | 22.5 | |  |  | | |  | | |  | | |  | | |
+                | Selling, general and administrative expense | | | 19,064 | |  |  | | | 16,562 | |  |  | | |  | | |  | | | 2,502 | |  |  | | | 15.1 | |  |  | | |  | | |  | | |  | | |
+                | Depreciation and amortization expense | | | 12,716 | |  |  | | | 11,679 | |  |  | | |  | | |  | | | 1,037 | |  |  | | | 8.9 | |  |  | | |  | | |  | | |  | | |
+                | Total Operating Expenses | | | $ | 74,660 |  |  | | | $ | 65,345 |  |  | | |  | | |  | | | $ | 9,315 |  |  | | | 14.3 | |  |  | | |  | | |  | | |  | | |
 
+                  
+                Cost of ServicesCost of services increased during 2022 compared to 2021 primarily due to:â€¢an increase in access costs of $848 million primarily due to the inclusion of TracFone results; andâ€¢an increase in rent expense of $198 million related to adding capacity to the networks to support demand and lease modifications for certain existing cell towers in April 2021 in connection with the build out of our 5G wireless network.  
+                Cost of Wireless EquipmentCost of wireless equipment increased during 2022 compared to 2021 primarily due to:â€¢an increase of $2.2 billion due to the inclusion of TracFone results;30
 
-  * Prostheses and physical complications must be paid through all stages of mastectomy, including lymphedema.
-   + Benefits may be subject to annual deductibles and coinsurance consistent with those established for other benefits under the plan of coverage.
-   + Mandate requires coverage for post-mastectomy supplies, related bras and lymphedema arm stockings.
-   + Carrier may **not** limit the number of prostheses obtained in connection with a mastectomy and breast reconstruction.
-  * Federal law does not place a time limit on when the mastectomy was performed or when the individual undergoes reconstructive surgery, it follows that no limitations can be placed on the number of prostheses covered by the plan:
-   + No limitation for number of prostheses, bras, and prosthetic devices that must be covered; nor limit the number (bras, etc.) purchased at one time.
-   + Applies to any enrollee who has had a mastectomy regardless of the diagnosis (i.e., does not have to be cancer-related).
-   + Applies when mastectomy was performed while enrollee was covered by a previous insurance carrier.
+                ---
 
-
-  **Quoting Benefits** for Mastectomy-Related Prostheses
-  ======================================================
-
-
-  Lack of limitations and general coverage can be quoted using above information."
+                [Table of Contents](#i3b787490285c4e13a4f3d7ac7775fbca_7)â€¢an increase of $1.5 billion driven by a higher volume of wireless devices sold, primarily related to a higher rate of upgrades; andâ€¢an increase of $1.0 billion related to a shift to higher priced equipment in the mix of wireless devices sold.   
+                Selling, General and Administrative ExpenseSelling, general and administrative expense increased during 2022 compared to 2021 primarily due to:â€¢an increase in personnel costs of $1.3 billion primarily due to the inclusion of TracFone results and increased third-party employee costs due to contracted services;â€¢an increase in provision for credit losses of $745 million driven by increased device payment loan volume and an increase in the expected loss rate primarily as a result of the change in device payment plan terms to 36 months, as well as actions taken in prior years in response to the COVID-19 pandemic; andâ€¢an increase in advertising expense of $454 million primarily due to the inclusion of TracFone results and brand marketing, including the launch of the 5G Ultra campaign in early 2022.  
+                Depreciation and Amortization ExpenseDepreciation and amortization expense increased during 2022 compared to 2021, driven by the change in the mix of total Verizon depreciable and amortizable assets and Consumer's usage of those assets."
         }}
 
 
   Example 2. 
-  This is the first round for the question is "I injured my back. Is massage therapy covered?" and the context includes document containing the following text: "The following services are not covered:
-  Alternative Treatments
-  Acupressure
-  Aromatherapy
-  Art/Dance/Music therapy
-  Animal-assisted therapy
-  Hypnotism
-  Massage therapy
-  Rolfing
-  Adventure-based/Wilderness/Outdoor therapy
-
-  We do not pay benefits for exclusions, even if:
-  It is recommended or prescribed by a doctor.
-  It is the only available treatment for your condition.".
+  This is the first round for the question is "Has HAL management provided any guidance on long-term margin targets?" and the context includes a document containing the following text: "In the Completion and Production division, activity is accelerating globally and scarcity will drive pricing in North America in the second quarter. As such, we expect second quarter revenue to grow in the mid-teens and margins to improve 350 to 400 basis points."
        The JSON response should be:
        {{
           "plan_and_summaries": "I have the question and the answer. The answer is very
            clear and I do not need any additional information to answer the question fully.",
-          "answer": "Massage therapy is an alternative treatment and is not covered.  We do not pay benefits for exclusions, even if recommended/prescribed by a doctor or if it's the only available treatment for your condition.",
+          "answer": "No guidance has been given in the last twelve months of earnings transcripts.  The last mention of earnings guidance was in the company's Q1 2022 earnings call, where BofA Analyst Chase Mulvehill asked a question where he implied that management mentioned guidance for margin improvement of 350-400 bps for Completion and Production.",
           "additional_information_to_retrieve": "",
-          "context_used": "Exclusions
-  Exclusions
-  Other Benefits
-  Exclusions
-  We do not pay benefits for exclusions, even if:
-
-  * It is recommended or prescribed by a doctor.
-  * It is the only available treatment for your condition.
-
-   **Need help understanding health care terms?**
-
-  View the  **[glossary](http://glossary.justplainclear.com/)**  for definitions.
-
-  Network Section:
-  Type: None
-  About Your Benefits
-  Description: The following services are not covered:  
-
-
-  **Alternative Treatments**
-
-  * Acupressure
-  * Aromatherapy
-  * Art/Dance/Music therapy
-  * Animal-assisted therapy
-  * Hypnotism
-  * Massage therapy
-  * Rolfing
-  * Adventure-based/Wilderness/Outdoor therapy"
-       }}
-      
-  The context_used field only contains the specific part of section 'Description: The following services are not covered:' in document '0905531-acis001-exclusions-exclusions' that contains the information used to answer the question.
-
-  Example 3. 
-  This is the first round for the question "My doctor said the code she was billing is 77061; can you confirm that's covered?" and the context includes document containing the following text:
-       "Codes 77061, 77062, 77063, G2079 represent 3D mammography; description may not include 3D.".
-       The JSON response should be:
-       {{
-          "plan_and_summaries": "I have a document title of 3D Mammography that addresses code 77061 within the document named "KM1619600-3d_mammography". However, I do not
-          have the specific benefit details and need to retrieve document named,
-          "0905531-acis001-preventive_care-mammograms_-_preventive". The 'Preventive Care Mammograms - Preventive' document has a section 'Network Section'
-          which seems useful to answer the question, so I need to retrieve this section from '0905531-acis001-preventive_care-mammograms_-_preventive' document",
-          "answer": "To provide a complete response for whether 77061 is covered or not, I need to provide both ‘Type:INN’ Network and ‘Type:OON’ Network benefits. The specific
-          details are specified in the document '0905531-acis001-preventive_care-mammograms_-_preventive' ",
-          "additional_information_to_retrieve": "What are the INN Network and OON Network coverage rules for code 77061, which happens to represent 3D mammography",
-          "context_used": "3D Mammography
-
-  * Standard benefit plan provides coverage for 3D Mammography/DBT for breast cancer screening (preventive) and diagnostic testing.
-  * Codes 77061, 77062, 77063, G2079 represent 3D mammography; description may not include **3D**.
-  * No specific diagnosis required.”
-       }}
-      
-       The context_used field only contains the specific
-       part of section '3D Mammography' in document 'KM1619600-3d_mammography'
-       that contains the information used to answer the question.
-
-
-  Example 4. This is the second round of the same question in example 3 above, and in this round the contents of section "Preventive Care Mammograms-Preventive" from '0905531-acis001-preventive_care-mammograms_-_preventive' document are included in the context. Section 'Network Section' contains text like "Type: INN” and “Type: OON” as part of routine routine benefit coverage details for in-network (INN) and out-of-network (OON) benefits.
-       The JSON response should be:
-       {{
-          "plan_and_summaries": "I have a document title of “Preventive Care 
-  Mammograms - Preventive” that has a section titled “Network Section”  from the
-          document "0905531-acis001-preventive_care-mammograms_-_preventive" from previous round JSON response. This information was sufficient to construct a comprehensive response for re: coverage of code 77061 and the benefits for INN network and OON network. I don’t need to retrieve any addition information.",
-          "answer": "77061 is a valid 3D mammography code. If received INN, there is no charge and the annual deductible does not apply. If received OON, then you are responsible for 40% coinsurance, after you pay the deductible. You do not need to get prior authorization before getting this care.",
-          "additional_information_to_retrieve": "",
-   "context_used": "Network Section:
-  Type: INN
-  Your cost if you use Network benefits
-  Description: **UHC Network**
-
-   **No Charge**
-
-   The annual deductible does not apply.
-
-   **You do not need to get prior authorization before getting this care.**
-
-   **Your doctor will get prior authorization if needed.**
-
-
-  Type: OON
-  Your cost if you use Out-of-Network benefits
-  Description: **40%** coinsurance
-
-   After you pay the deductible.
-
-   **You do not need to get prior authorization before getting this care.**
-
-  ”
-
+          "context_used": "In the Completion and Production division, activity is accelerating globally and scarcity will drive pricing in North America in the second quarter. As such, we expect second quarter revenue to grow in the mid-teens and margins to improve 350 to 400 basis points."
        }}
 
-
-  Here is the input information you are given; each one is delimited with three backticks (`):
+    Here is the input information you are given; each one is delimited with three backticks (`):
 
   1. The question asked by the employee.
   ```

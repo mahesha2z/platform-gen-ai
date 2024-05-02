@@ -81,7 +81,7 @@ class DocumentRetriever(ABC):
     ):
         documents = []
         for question in questions_for_search:
-            documents.extend(self.get_related_docs_from_store_uhg(store, question, metadata))
+            documents.extend(self.get_related_docs_from_store(store, question, metadata))
         documents = common.remove_duplicates(documents)
         return documents
 
@@ -101,6 +101,25 @@ class SemanticDocumentRetriever(DocumentRetriever):
             search query.
     """
 
+    # @trace_on("Retrieving documents from semantic store", measure_time=True)
+    # def get_related_docs_from_store(
+    #     self, store: Chroma, questions_for_search: str, metadata: dict[str, str] | None = None
+    # ) -> list[Document]:
+    #     if metadata is None:
+    #         metadata = {}
+    #     metadata = remove_member_id(metadata)
+    #     if metadata is not None and len(metadata) > 1:
+    #         metadata = convert_to_chroma_format(metadata)
+
+    #     ss_docs = store.similarity_search_with_score(query=questions_for_search, k=50, filter=metadata)
+    #     ss_docs = [x[0] for x in ss_docs[0:3]]
+
+    #     mmr_docs = store.max_marginal_relevance_search(
+    #         query=questions_for_search, k=2, lambda_mult=0.5, filter=metadata
+    #     )
+    #     docs = common.remove_duplicates(ss_docs + mmr_docs)
+
+    #     return docs
     @trace_on("Retrieving documents from semantic store", measure_time=True)
     def get_related_docs_from_store(
         self, store: Chroma, questions_for_search: str, metadata: dict[str, str] | None = None
@@ -111,16 +130,15 @@ class SemanticDocumentRetriever(DocumentRetriever):
         if metadata is not None and len(metadata) > 1:
             metadata = convert_to_chroma_format(metadata)
 
-        ss_docs = store.similarity_search_with_score(query=questions_for_search, k=50, filter=metadata)
-        ss_docs = [x[0] for x in ss_docs[0:3]]
+        ss_docs = store.similarity_search_with_score(query=questions_for_search, k=50)
+        ss_docs = [x[0] for x in ss_docs[0:20]]
 
         mmr_docs = store.max_marginal_relevance_search(
-            query=questions_for_search, k=2, lambda_mult=0.5, filter=metadata
+            query=questions_for_search, k=1, lambda_mult=0.5
         )
         docs = common.remove_duplicates(ss_docs + mmr_docs)
 
         return docs
-
     @trace_on("Retrieving documents from semantic store", measure_time=True)
     def get_related_docs_from_store_uhg(
         self, store: Chroma, questions_for_search: str, metadata: dict[str, str] | None = None

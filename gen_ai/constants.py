@@ -7,12 +7,12 @@ FAVICON_PATH = "/mnt/resources/argo-logo-compact.webp"
 USERS_FILE = "/mnt/resources/users.json"
 LLM_YAML_FILE = "gen_ai/llm.yaml"
 
-PROCESSED_FILES_DIR = "/mnt/resources/uhg/main_folder"
+PROCESSED_FILES_DIR = "/mnt/resources/factset/main_folder"
 
 LOGS_DIRECTORY = "gen_ai/logs"
 VECTOR_STORE = "gen_ai/vector_store"
 
 MAX_OUTPUT_TOKENS = 4000
 MAX_CONTEXT_SIZE = 1025000
-RETRIEVER_SCORE_THRESHOLD = 2
+RETRIEVER_SCORE_THRESHOLD = 0
 MEMORY_STORE_IP = "10.151.191.44"
