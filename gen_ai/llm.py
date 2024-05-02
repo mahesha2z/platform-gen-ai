@@ -28,6 +28,7 @@ Dependencies:
 
 from timeit import default_timer
 from typing import Any
+import uuid
 
 import json5
 from dependency_injector.wiring import inject
@@ -355,12 +356,74 @@ def generate_response_react(conversation: Conversation) -> tuple[Conversation, l
     conversation.round_numder = round_number
     query_state.answer = output["answer"]
     query_state.relevant_context = output["context_used"]
-    query_state.urls = list(set(document.metadata["url"] for document in post_filtered_docs))
     query_state.all_sections_needed = [x[0] for x in query_state.used_articles_with_scores]
     query_state.used_articles_with_scores = None
     query_state.confidence_score = confidence
+    query_state = fill_query_state_with_doc_attributes(query_state, post_filtered_docs)
 
     return conversation, log_snapshots
+
+
+def fill_query_state_with_doc_attributes(query_state: QueryState, post_filtered_docs: list[Document]) -> QueryState:
+    """
+    Updates the provided query_state object with attributes extracted from documents after filtering.
+
+    This function modifies the query_state object by setting various attributes based on the metadata of documents 
+    in the post_filtered_docs list. It processes documents to categorize them by their data source 
+    (B360, KM or MP from KC), and updates the query_state with URLs, and categorized attributes for each type.
+
+    Args:
+        query_state (QueryState): The query state object that needs to be updated with document attributes.
+        post_filtered_docs (list[Document]): A list of Document objects that have been filtered and whose attributes 
+        are to be extracted.
+
+    Returns:
+        QueryState: The updated query state object with new attributes set based on the provided documents.
+
+    Side effects:
+        Modifies the query_state object by setting the following attributes:
+        - urls: A set of unique URLs extracted from the document metadata.
+        - attributes_to_b360: A list of dictionaries with attributes from B360 documents.
+        - attributes_to_kc_km: A list of dictionaries with attributes from KC KM documents.
+        - attributes_to_kc_mp: A list of dictionaries with attributes from KC MP documents.
+
+    """
+    query_state.urls = list(set(document.metadata["url"] for document in post_filtered_docs))
+
+    # B360 documents
+    b360_docs = [x for x in post_filtered_docs if x.metadata["data_source"] == "b360"]
+    attributes_to_b360 = [
+        {"set_number": x.metadata["set_number"], "section_name": x.metadata["section_name"]} for x in b360_docs
+    ]
+
+    # KC documents, they can be of two types: from KM (dont have policy number) and from MP (have policy number)
+    kc_docs = [x for x in post_filtered_docs if x.metadata["data_source"] == "kc"]
+    kc_km_docs = [x for x in kc_docs if not x.metadata["policy_number"]]
+    kc_mp_docs = [x for x in kc_docs if x.metadata["policy_number"]]
+
+    attributes_to_kc_km = [
+        {
+            "doc_type": "km",
+            "doc_identifier": x.metadata["doc_identifier"],
+            "url": x.metadata["url"],
+            "section_name": x.metadata["section_name"],
+        }
+        for x in kc_km_docs
+    ]
+    attributes_to_kc_mp = [
+        {
+            "doc_type": "mp",
+            "original_filepath": x.metadata["original_filepath"],
+            "policy_number": x.metadata["policy_number"],
+            "section_name": x.metadata["section_name"],
+        }
+        for x in kc_mp_docs
+    ]
+
+    query_state.attributes_to_b360 = attributes_to_b360
+    query_state.attributes_to_kc_km = attributes_to_kc_km
+    query_state.attributes_to_kc_mp = attributes_to_kc_mp
+    return query_state
 
 
 def respond(conversation: Conversation, member_info: dict) -> Conversation:
@@ -393,12 +456,14 @@ def respond(conversation: Conversation, member_info: dict) -> Conversation:
     if statefullness_enabled:
         serialize_response(conversation)
 
-    df = BigQueryConverter.convert_query_state_to_prediction(conversation.exchanges[-1], log_snapshots)
+    session_id = Container.session_id if hasattr(Container, "session_id") else str(uuid.uuid4())
+    df = BigQueryConverter.convert_query_state_to_prediction(conversation.exchanges[-1], log_snapshots, session_id)
     client = create_bq_client()
     dataset_id = get_dataset_id()
     table_id = f"{dataset_id}.prediction"
     load_data_to_bq(client, table_id, schema_prediction, df)
 
+    conversation.session_id = session_id
     return conversation
 
 

@@ -280,7 +280,7 @@ class BigQueryConverter:
     """
 
     @staticmethod
-    def convert_query_state_to_prediction(query_state: QueryState, log_snapshots: list[dict]) -> pd.DataFrame:
+    def convert_query_state_to_prediction(query_state: QueryState, log_snapshots: list[dict], session_id: str) -> pd.DataFrame:
         data = {
             "user_id": [],
             "prediction_id": [],
@@ -309,7 +309,6 @@ class BigQueryConverter:
             "plan_and_summaries": [],
         }
         max_round = len(log_snapshots) - 1
-        session_id = Container.session_id if hasattr(Container, "session_id") else str(uuid.uuid4())
         system_state_id = Container.system_state_id or log_system_status(session_id)
         for round_number, log_snapshot in enumerate(log_snapshots):
             react_round_number = round_number

@@ -87,10 +87,24 @@ class LLMOutput(BaseModel):
         urls_to_kc (list[str]): A list of URLs to knowledge components that were referenced or
                                 could be relevant to the response. This can help users to explore
                                 related topics or verify information.
-        sections_to_b360 (list[str]): A list of sections or identifiers within a broader system
-                                      (like B360) that are relevant to the response. This is useful
-                                      for integrating the AI's responses with other systems or databases.
+        attributes_to_kc_km (list[dict[str, str, str]]): A list of quatrlets:
+                                - Document type (can be "KM" or "MP"), both come from KC
+                                - Document identifier (doc_identifier for KM, original_filepath for MP)
+                                - URL (exists only for KM, is empty for MP)
+                                - Section Name (exists for all: B360, KC KM, KC MP)
+                                This can help users to explore related topics or verify information.
+        attributes_to_kc_mp (list[dict[str, str, str]]): A list of quatrlets:
+                                - Document type (can be "KM" or "MP"), both come from KC
+                                - Original filepath (original_filepath for MP)
+                                - Policy number (exists only for MP, is empty for KM)
+                                - Section Name (exists for all: B360, KC KM, KC MP)
+                                This can help users to explore related topics or verify information.
+        attributes_to_b360 (list[dict[str, str]]): A list of tuples:
+                                - Set number, exists only in b360 
+                                - Section name, name of the chunk from B360
+                                This is useful for integrating the AI's responses with other systems or databases.
         confidence_score (str): The conversation confidence_score, indicating how confident was the answer.
+        session_id (str): The conversation session_id, which can be used to track the answers in BigQuery.
 
     Note:
         The attributes `plan_and_summaries`, `additional_information_to_retrieve`, `context_used`,
@@ -105,7 +119,11 @@ class LLMOutput(BaseModel):
     additional_information_to_retrieve: str
     context_used: str
     urls_to_kc: list[str]
-    sections_to_b360: list[str]
+    attributes_to_kc_km: list[dict]
+    attributes_to_kc_mp: list[dict]
+    attributes_to_b360: list[dict]
+    confidence_score: str
+    session_id: str
 
 
 @dataclass
@@ -126,7 +144,10 @@ class QueryState:
         used_articles_with_scores: A list of the articles that were used to generate the answer with the scores.
         additional_information_to_retrieve: Any additional information that needs to be retrieved.
         time_taken: The time taken to generate the answer.
-        retrieved_docs: Documents that were retrieved during the answering
+        confidence_score: Confidence score of the answer of the final round
+        attributes_to_kc_km: List of dictionaries, that represents information from KC, type KM. See LLMOutput
+        attributes_to_kc_mp: List of dictionaries, that represents information from KC, type MP. See LLMOutput
+        attributes_to_b360: List of dictionaries, that represents information from B360. See LLMOutput
     """
 
     question: str
@@ -143,6 +164,10 @@ class QueryState:
     additional_information_to_retrieve: str | None = field(default=None)
     time_taken: int = field(default=0)
     confidence_score: int = field(default=0)
+    attributes_to_kc_km: list[dict[str, str, str]] = field(default_factory=list)
+    attributes_to_kc_mp: list[dict[str, str, str]] = field(default_factory=list)
+    attributes_to_b360: list[dict[str, str]]= field(default_factory=list)
+
 
 
 @dataclass
